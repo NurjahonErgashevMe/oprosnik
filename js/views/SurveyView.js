@@ -19,81 +19,79 @@ export class SurveyView {
     }
 
     const progress = this.app.getProgress();
+    const totalQuestions = this.app.state.questions.length;
+
     const progressBarColor = question.media
       ? "#a0aec0"
       : "var(--primary-color)";
 
     return `
-            <div class="survey-view">
-                <header class="header">
-                    <h1 class="header__title">Вопрос ${progress.current} из ${
-      progress.total
-    }</h1>
-                    <p class="header__subtitle">${
-                      this.app.state.userData.name
-                    }</p>
-                </header>
-                
-                <div class="card">
-                    <div class="progress-container">
-                        <div class="progress-bar" id="progressBar" 
-                             style="width: 100%; background-color: ${progressBarColor}">
-                        </div>
+        <div class="survey-view">
+            <header class="header">
+                <h1 class="header__title">Вопрос ${
+                  progress.current
+                } из ${totalQuestions}</h1>
+                <p class="header__subtitle">${this.app.state.userData.name}</p>
+            </header>
+            
+            <div class="card">
+                <div class="progress-container">
+                    <div class="progress-bar" id="progressBar" 
+                         style="width: 100%; background-color: ${progressBarColor}">
                     </div>
-                    
-                    <div class="question">
-                        <div class="question__meta">
-                            <span class="question__difficulty question__difficulty--${
-                              question.difficulty
-                            }">
-                                ${
-                                  question.difficulty === "easy"
-                                    ? "Легко"
-                                    : "Сложно"
-                                }
-                            </span>
-                            <span class="question__points">${
-                              question.points
-                            } балла</span>
-                        </div>
-                        
-                        <p class="question__text">${question.text}</p>
-                        
-                        ${
-                          question.media ? this.renderMedia(question.media) : ""
-                        }
-                        
-                        <ul class="options">
-                            ${question.options
-                              .map(
-                                (option, i) => `
-                                <li class="option">
-                                    <input type="radio" 
-                                           id="option-${i}" 
-                                           name="answer" 
-                                           value="${i}" 
-                                           class="option__input">
-                                    <label for="option-${i}" class="option__label">
-                                        <span class="option__indicator"></span>
-                                        <span class="option__text">${option}</span>
-                                    </label>
-                                </li>
-                            `
-                              )
-                              .join("")}
-                        </ul>
-                    </div>
-                    
-                    <button id="nextBtn" class="btn btn--primary">
-                        ${
-                          progress.current === progress.total
-                            ? "Завершить"
-                            : "Далее"
-                        }
-                    </button>
                 </div>
+                
+                <div class="question">
+                    <div class="question__meta">
+                        <span class="question__difficulty question__difficulty--${
+                          question.difficulty
+                        }">
+                            ${
+                              question.difficulty === "easy"
+                                ? "Легко"
+                                : "Сложно"
+                            }
+                        </span>
+                        <span class="question__points">${
+                          question.points
+                        } балла</span>
+                    </div>
+                    
+                    <p class="question__text">${question.text}</p>
+                    
+                    ${question.media ? this.renderMedia(question.media) : ""}
+                    
+                    <ul class="options">
+                        ${question.options
+                          .map(
+                            (option, i) => `
+                            <li class="option">
+                                <input type="radio" 
+                                       id="option-${i}" 
+                                       name="answer" 
+                                       value="${i}" 
+                                       class="option__input">
+                                <label for="option-${i}" class="option__label">
+                                    <span class="option__indicator"></span>
+                                    <span class="option__text">${option}</span>
+                                </label>
+                            </li>
+                        `
+                          )
+                          .join("")}
+                    </ul>
+                </div>
+                
+                <button id="nextBtn" class="btn btn--primary">
+                    ${
+                      progress.current === totalQuestions
+                        ? "Завершить"
+                        : "Далее"
+                    }
+                </button>
             </div>
-        `;
+        </div>
+    `;
   }
 
   renderMedia(media) {

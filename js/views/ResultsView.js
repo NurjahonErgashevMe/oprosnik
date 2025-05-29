@@ -8,76 +8,74 @@ export class ResultsView {
     const totalPoints = answers.reduce((sum, a) => sum + a.points, 0);
     const maxPoints = questions.reduce((sum, q) => sum + q.points, 0);
     const correctAnswers = answers.filter((a) => a.isCorrect).length;
-    const totalQuestions = questions.length;
+    const totalQuestions = questions.length; 
 
     // Получаем рейтинг участников
     const ranking = this.getRanking();
 
     return `
-            <div class="results-view">
-                <header class="header">
-                    <h1 class="header__title">Результаты опроса</h1>
-                    <p class="header__subtitle">${userData.name}, ${
+        <div class="results-view">
+            <header class="header">
+                <h1 class="header__title">Результаты опроса</h1>
+                <p class="header__subtitle">${userData.name}, ${
       userData.skillLevel === "beginner"
         ? "начинающий уровень"
         : "мастер уровень"
     }</p>
-                </header>
-                
-                <div class="card">
-                    <div class="results-summary">
-                        <div class="results-score">
-                            <span class="score-number">${totalPoints}</span>
-                            <span class="score-text">из ${maxPoints} баллов</span>
-                        </div>
-                        
-                        <div class="progress-container" style="margin: 1.5rem 0;">
-                            <div class="progress-bar" style="width: ${Math.round(
-                              (totalPoints / maxPoints) * 100
-                            )}%; background-color: ${this.getScoreColor(
+            </header>
+            
+            <div class="card">
+                <div class="results-summary">
+                    <div class="results-score">
+                        <span class="score-number">${totalPoints}</span>
+                        <span class="score-text">из ${maxPoints} баллов</span>
+                    </div>
+                    
+                    <div class="progress-container" style="margin: 1.5rem 0;">
+                        <div class="progress-bar" style="width: ${Math.round(
+                          (totalPoints / maxPoints) * 100
+                        )}%; background-color: ${this.getScoreColor(
       (totalPoints / maxPoints) * 100
     )};"></div>
-                        </div>
-                        
-                        <p class="results-percentage">${correctAnswers} из ${totalQuestions} правильных ответов</p>
                     </div>
                     
-                    <h3 class="results-subtitle">Рейтинг участников</h3>
-                    <div class="ranking-container">
-                        <table class="ranking-table">
-                            <thead>
-                                <tr>
-                                    <th>Место</th>
-                                    <th>Участник</th>
-                                    <th>Баллы</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${ranking
-                                  .map(
-                                    (participant, index) => `
-                                    <tr class="${
-                                      participant.isCurrent
-                                        ? "current-user"
-                                        : ""
-                                    }">
-                                        <td>${index + 1}</td>
-                                        <td>${participant.name}</td>
-                                        <td>${participant.score}</td>
-                                    </tr>
-                                `
-                                  )
-                                  .join("")}
-                            </tbody>
-                        </table>
-                    </div>
-                    
-                    <button id="restartBtn" class="btn btn--primary" style="margin-top: 2rem;">
-                        Пройти тест еще раз
-                    </button>
+                    <p class="results-percentage">${correctAnswers} из ${totalQuestions} правильных ответов</p>
                 </div>
+                
+                <h3 class="results-subtitle">Рейтинг участников</h3>
+                <div class="ranking-container">
+                    <table class="ranking-table">
+                        <thead>
+                            <tr>
+                                <th>Место</th>
+                                <th>Участник</th>
+                                <th>Баллы</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${ranking
+                              .map(
+                                (participant, index) => `
+                                <tr class="${
+                                  participant.isCurrent ? "current-user" : ""
+                                }">
+                                    <td>${index + 1}</td>
+                                    <td>${participant.name}</td>
+                                    <td>${participant.score}</td>
+                                </tr>
+                            `
+                              )
+                              .join("")}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <button id="restartBtn" class="btn btn--primary" style="margin-top: 2rem;">
+                    Пройти тест еще раз
+                </button>
             </div>
-        `;
+        </div>
+    `;
   }
 
   getRanking() {
@@ -160,15 +158,4 @@ export class ResultsView {
             </ul>
         `;
   }
-
-
-  // afterRender() {
-  //   document.getElementById("restartBtn")?.addEventListener("click", () => {
-  //     this.app.resetAnswers();
-  //     this.app.navigateTo("registration");
-  //   });
-
-  //   // In a real app, send email here
-  //   console.log(`Results email sent to ${this.app.state.userData.email}`);
-  // }
 }

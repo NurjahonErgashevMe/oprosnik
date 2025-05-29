@@ -1,9 +1,14 @@
+import { QuestionManager } from "../modules/QuestionManager.js";
+
 export class RegistrationView {
   constructor(app) {
     this.app = app;
   }
 
   render() {
+    const beginnerCount = QuestionManager.beginnerQuestions.length;
+    const masterCount = QuestionManager.masterQuestions.length;
+
     return `
             <div class="registration-view">
                 <header class="header">
@@ -27,8 +32,8 @@ export class RegistrationView {
                             <label for="skillLevel" class="form-label">Уровень навыков</label>
                             <select id="skillLevel" class="form-select" required aria-required="true">
                                 <option value="">Выберите уровень</option>
-                                <option value="beginner">Начинающий (30 вопросов)</option>
-                                <option value="master">Мастер (40 вопросов)</option>
+                                <option value="beginner">Начинающий (${beginnerCount} вопросов)</option>
+                                <option value="master">Мастер (${masterCount} вопросов)</option>
                             </select>
                         </div>
                         
