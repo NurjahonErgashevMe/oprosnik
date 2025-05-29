@@ -96,27 +96,31 @@ export class SurveyView {
   }
 
   renderMedia(media) {
-    if (!media) return "";
-
     return `
-            <div class="media-container" id="mediaContainer">
-                ${
-                  media.type === "image"
-                    ? `
-                    <img src="${media.src}" alt="Изображение для вопроса" id="questionMedia">
-                `
-                    : `
-                    <video controls id="questionMedia">
-                        <source src="${media.src}" type="video/mp4">
-                    </video>
-                `
-                }
-                <div class="media-loader" id="mediaLoader">
-                    <div class="loader-spinner"></div>
-                    <p>Загрузка медиа...</p>
-                </div>
+        <div class="media-container" id="mediaContainer">
+            ${
+              media.type === "image"
+                ? `
+                <img src="${media.src}" 
+                     alt="Изображение для вопроса" 
+                     id="questionMedia"
+                     crossorigin="anonymous"> <!-- Для корректной обработки -->
+            `
+                : `
+                <video controls 
+                       id="questionMedia"
+                       preload="auto"
+                       crossorigin="anonymous">
+                    <source src="${media.src}" type="video/mp4">
+                </video>
+            `
+            }
+            <div class="media-loader" id="mediaLoader">
+                <div class="loader-spinner"></div>
+                <p>Загрузка медиа...</p>
             </div>
-        `;
+        </div>
+    `;
   }
 
   renderOption(option, index) {
@@ -202,64 +206,19 @@ export class SurveyView {
     const loader = document.getElementById("mediaLoader");
     this.mediaType = media.type;
 
-    const onMediaReady = () => {
-      if (loader) loader.style.display = "none";
-      this.mediaReady = true;
-
-      if (media.type === "video") {
-        const handleFirstPlay = () => {
-          if (!this.videoWasPlayed) {
-            this.videoWasPlayed = true;
-            this.initTimer();
-          }
-        };
-
-        mediaElement.addEventListener("play", handleFirstPlay);
-      } else {
-        this.initTimer();
-      }
-    };
-
-    if (mediaElement) {
-      if (mediaElement.tagName === "IMG") {
-        if (mediaElement.complete) {
-          onMediaReady();
-        } else {
-          mediaElement.onload = onMediaReady;
-        }
-      } else if (mediaElement.tagName === "VIDEO") {
-        if (mediaElement.readyState >= 3) {
-          // HAVE_FUTURE_DATA
-          onMediaReady();
-        } else {
-          mediaElement.oncanplaythrough = onMediaReady;
-        }
-      }
-
-      mediaElement.onerror = () => {
-        if (loader) loader.innerHTML = "<p>Ошибка загрузки медиа</p>";
-        this.mediaReady = true;
-        this.initTimer();
-      };
-    } else {
-      // Если по какой-то причине элемент не найден
-      this.mediaReady = true;
-      this.initTimer();
-    }
-  }
-
-  // SurveyView.js - обновленный метод setupMediaLoader
-  setupMediaLoader(media) {
-    const mediaElement = document.getElementById("questionMedia");
-    const loader = document.getElementById("mediaLoader");
-    this.mediaType = media.type;
+    // Флаг для отслеживания готовности медиа
+    let isMediaReady = false;
 
     const onMediaReady = () => {
+      if (isMediaReady) return;
+      isMediaReady = true;
+
       if (loader) {
         loader.style.display = "none";
       }
       this.mediaReady = true;
 
+      // Для видео обрабатываем только первое воспроизведение
       if (media.type === "video") {
         const handleFirstPlay = () => {
           if (!this.videoWasPlayed) {
@@ -274,48 +233,66 @@ export class SurveyView {
       }
     };
 
-    // Проверяем состояние загрузки
-    let isMediaReady = false;
-
-    if (mediaElement) {
+    // Универсальная функция проверки готовности медиа
+    const checkMediaReady = () => {
+      // Для изображений
       if (mediaElement.tagName === "IMG") {
-        // Для изображений
-        if (mediaElement.complete) {
-          isMediaReady = true;
-        } else {
-          mediaElement.onload = onMediaReady;
-          mediaElement.onerror = () => {
-            if (loader) loader.innerHTML = "<p>Ошибка загрузки изображения</p>";
-            this.mediaReady = true;
-            this.initTimer();
-          };
-        }
-      } else if (mediaElement.tagName === "VIDEO") {
-        // Для видео
-        const checkVideoState = () => {
-          if (mediaElement.readyState >= 3) {
-            // HAVE_FUTURE_DATA
-            isMediaReady = true;
-          } else {
-            mediaElement.oncanplaythrough = onMediaReady;
-          }
-        };
-
-        // Проверяем сразу при создании элемента
-        setTimeout(checkVideoState, 0);
-
-        mediaElement.onerror = () => {
-          if (loader) loader.innerHTML = "<p>Ошибка загрузки видео</p>";
-          this.mediaReady = true;
-          this.initTimer();
-        };
+        return mediaElement.complete && mediaElement.naturalHeight > 0;
       }
+
+      // Для видео
+      if (mediaElement.tagName === "VIDEO") {
+        return mediaElement.readyState >= 2; // HAVE_CURRENT_DATA
+      }
+
+      return false;
+    };
+
+    // Проверяем состояние медиа
+    if (mediaElement && checkMediaReady()) {
+      onMediaReady();
+    } else {
+      // Устанавливаем обработчики для всех возможных событий готовности
+      const events = [
+        "load",
+        "loadeddata",
+        "loadedmetadata",
+        "canplay",
+        "canplaythrough",
+        "progress",
+      ];
+
+      const onProgress = () => {
+        if (checkMediaReady()) {
+          // Удаляем все обработчики
+          events.forEach((event) => {
+            mediaElement.removeEventListener(event, onProgress);
+          });
+          onMediaReady();
+        }
+      };
+
+      // Подписываемся на события
+      events.forEach((event) => {
+        mediaElement.addEventListener(event, onProgress);
+      });
+
+      // Таймаут на случай проблем с событиями
+      setTimeout(() => {
+        if (!isMediaReady && checkMediaReady()) {
+          onMediaReady();
+        }
+      }, 500);
     }
 
-    // Если медиа уже загружено, сразу вызываем onMediaReady
-    if (isMediaReady) {
-      onMediaReady();
-    }
+    // Обработка ошибок
+    mediaElement.onerror = () => {
+      if (loader) {
+        loader.innerHTML = "<p>Ошибка загрузки медиа</p>";
+      }
+      this.mediaReady = true;
+      this.initTimer();
+    };
   }
 
   initTimer() {
