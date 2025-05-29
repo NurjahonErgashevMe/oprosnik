@@ -1,0 +1,114 @@
+.question {
+  margin-bottom: 2rem;
+}
+
+.question__meta {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.question__text {
+  font-size: 1.125rem;
+  margin-bottom: 1.5rem;
+  line-height: 1.6;
+}
+
+.question__difficulty {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.question__difficulty--easy {
+  background-color: #f0fdf4;
+  color: #166534;
+}
+
+.question__difficulty--hard {
+  background-color: #fef2f2;
+  color: #991b1b;
+}
+
+.question__points {
+  font-size: 0.875rem;
+  color: var(--text-light);
+  background: #f1f5f9;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+}
+
+.options {
+  list-style: none;
+  margin: 1.5rem 0;
+}
+
+.option {
+  margin-bottom: 0.75rem;
+}
+
+.option__input {
+  position: absolute;
+  opacity: 0;
+}
+
+.option__label {
+  display: flex;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  background-color: var(--white);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: var(--transition);
+  font-weight: 400;
+  position: relative;
+  gap: 1rem;
+}
+
+.option__label:hover {
+  border-color: var(--primary-color);
+  background-color: var(--primary-light);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+
+.option__input:checked + .option__label {
+  border-color: var(--primary-color);
+  background-color: var(--primary-light);
+}
+
+.option__indicator {
+  width: 1.25rem;
+  height: 1.25rem;
+  border: 2px solid var(--border-color);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition);
+  flex-shrink: 0;
+}
+
+.option__input:checked + .option__label .option__indicator {
+  border-color: var(--primary-color);
+  background-color: var(--primary-color);
+}
+
+.option__input:checked + .option__label .option__indicator::after {
+  content: "";
+  display: block;
+  width: 0.5rem;
+  height: 0.5rem;
+  background-color: white;
+  border-radius: 50%;
+}
+
+.option__text {
+  flex-grow: 1;
+}
