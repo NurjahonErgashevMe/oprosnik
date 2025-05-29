@@ -56,10 +56,11 @@ export class SurveyView {
                           question.points
                         } балла</span>
                     </div>
-                    
-                    <p class="question__text">${question.text}</p>
+                  
                     
                     ${question.media ? this.renderMedia(question.media) : ""}
+
+                    <p class="question__text">${question.text}</p>
                     
                     <ul class="options">
                         ${question.options
