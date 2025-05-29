@@ -140,10 +140,8 @@ export class SurveyView {
     this.resetQuestionState(question);
     this.currentQuestionId = question.id;
 
-    // Устанавливаем обработчики для вариантов ответа
     this.setupOptionListeners();
 
-    // Устанавливаем обработчик для кнопки "Далее"
     document.getElementById("nextBtn").addEventListener("click", () => {
       this.handleNextButton();
     });
@@ -152,7 +150,8 @@ export class SurveyView {
       this.mediaReady = true;
       this.initTimer();
     } else {
-      this.setupMediaLoader(question.media);
+      // Запускаем проверку состояния медиа с небольшой задержкой
+      setTimeout(() => this.setupMediaLoader(question.media), 100);
     }
 
     this.setupProgressTooltip();
@@ -249,49 +248,74 @@ export class SurveyView {
     }
   }
 
+  // SurveyView.js - обновленный метод setupMediaLoader
   setupMediaLoader(media) {
     const mediaElement = document.getElementById("questionMedia");
     const loader = document.getElementById("mediaLoader");
     this.mediaType = media.type;
 
     const onMediaReady = () => {
-      loader.style.display = "none";
+      if (loader) {
+        loader.style.display = "none";
+      }
       this.mediaReady = true;
 
       if (media.type === "video") {
         const handleFirstPlay = () => {
           if (!this.videoWasPlayed) {
             this.videoWasPlayed = true;
-            document.getElementById("nextBtn").disabled = false;
             this.initTimer();
-            mediaElement.removeEventListener("play", handleFirstPlay);
           }
         };
 
         mediaElement.addEventListener("play", handleFirstPlay);
       } else {
-        // Для изображений запускаем таймер сразу после загрузки
-        document.getElementById("nextBtn").disabled = false;
         this.initTimer();
       }
     };
 
-    if (mediaElement.tagName === "IMG") {
-      if (mediaElement.complete) {
-        onMediaReady();
-      } else {
-        mediaElement.onload = onMediaReady;
+    // Проверяем состояние загрузки
+    let isMediaReady = false;
+
+    if (mediaElement) {
+      if (mediaElement.tagName === "IMG") {
+        // Для изображений
+        if (mediaElement.complete) {
+          isMediaReady = true;
+        } else {
+          mediaElement.onload = onMediaReady;
+          mediaElement.onerror = () => {
+            if (loader) loader.innerHTML = "<p>Ошибка загрузки изображения</p>";
+            this.mediaReady = true;
+            this.initTimer();
+          };
+        }
+      } else if (mediaElement.tagName === "VIDEO") {
+        // Для видео
+        const checkVideoState = () => {
+          if (mediaElement.readyState >= 3) {
+            // HAVE_FUTURE_DATA
+            isMediaReady = true;
+          } else {
+            mediaElement.oncanplaythrough = onMediaReady;
+          }
+        };
+
+        // Проверяем сразу при создании элемента
+        setTimeout(checkVideoState, 0);
+
+        mediaElement.onerror = () => {
+          if (loader) loader.innerHTML = "<p>Ошибка загрузки видео</p>";
+          this.mediaReady = true;
+          this.initTimer();
+        };
       }
-    } else if (mediaElement.tagName === "VIDEO") {
-      mediaElement.oncanplaythrough = onMediaReady;
     }
 
-    mediaElement.onerror = () => {
-      loader.innerHTML = "<p>Ошибка загрузки медиа</p>";
-      this.mediaReady = true;
-      document.getElementById("nextBtn").disabled = false;
-      this.initTimer();
-    };
+    // Если медиа уже загружено, сразу вызываем onMediaReady
+    if (isMediaReady) {
+      onMediaReady();
+    }
   }
 
   initTimer() {
